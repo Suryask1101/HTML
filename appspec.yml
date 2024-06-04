@@ -1,0 +1,29 @@
+version: 0.0
+os: linux
+files:
+  - source: index.html
+    destination: /var/www/html
+hooks:
+  BeforeInstall:
+    - location: /dev/stdin
+      timeout: 300
+      runas: root
+      script: |
+        #!/bin/bash
+        # Install httpd if it's not already installed
+        if ! command -v httpd &> /dev/null; then
+            sudo yum update -y
+            sudo yum install -y httpd
+        fi
+
+        # Enable and start the httpd service
+        sudo systemctl enable httpd
+        sudo systemctl start httpd
+  ApplicationStart:
+    - location: /dev/stdin
+      timeout: 300
+      runas: root
+      script: |
+        #!/bin/bash
+        # Restart the httpd service to ensure it picks up any new configurations or files
+        sudo systemctl restart httpd
